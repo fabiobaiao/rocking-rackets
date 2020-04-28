@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import requests
-from BeautifulSoup import BeautifulSoup
+from bs4 import BeautifulSoup
 
 gameworld = "rr" + str(input("Game World: "))
 
@@ -14,10 +14,12 @@ loginformdata = {'username':'usinegEs', 'password':'JrGxd82ej7xazJ', 'login':'Lo
 loginrequest = requests.post("http://" + mainurl, data = loginformdata)
 
 loop = True
+i = 0
 while loop:
+    i = i + 1
 
     #playerparams = {'page': 'player', 'extra': newplayer}
-    hireformdata = {'player_id': newplayer, 'hire': ' '}
+    hireformdata = {'player_id': newplayer, 'hire': 'Hire+for+0+points'}
     #hire = requests.post("http://" + gameworld + '.' + mainurl, params = playerparams, data = hireformdata, cookies = loginrequest.cookies)
     tryrequest = True
     while tryrequest:
@@ -28,24 +30,25 @@ while loop:
             pass
 
 
-    hirehtml = BeautifulSoup(hirerequest.text)
+    hirehtml = BeautifulSoup(hirerequest.text, features='html.parser')
     tree = hirehtml.body
 
     for content in tree:
         if not content.string:
-            if content.name == 'div' and content['class'] == 'body':
+            if content.name == 'div' and content['class'][0] == 'body':
                 tree = content
                 break
 
     for content in tree:
         if not content.string:
-            if content.name == 'div' and content['class'] == 'content':
+            print(content)
+            if content.name == 'div' and content['class'][0] == 'content':
                 tree = content
                 break
 
     for content in tree:
         if not content.string:
-            if content.name == 'div' and content['class'] == 'error':
+            if content.name == 'div' and content['class'][0] == 'error':
                 tree = content
                 break
 
@@ -53,6 +56,8 @@ while loop:
 
     if "This player can't be hired yet. After a player is fired he cannot be rehired by someone else for 12 to 36 hours." not in str(error):
         loop = False
+
+    print("{}: {}".format(i, str(error)))
 
 
 if "You can only have 2 players. (You have 2)" in str(error):

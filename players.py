@@ -5,8 +5,8 @@ import decimal
 import requests
 from termcolor import cprint
 from tabulate import tabulate
-from urlparse import parse_qs
-from BeautifulSoup import BeautifulSoup
+from urllib.parse import parse_qs
+from bs4 import BeautifulSoup
 #from bs4 import BeautifulSoup
 
 def headerList():
@@ -262,36 +262,36 @@ def fetchPlayerInfo(player, cookies):
     playerparams = {'page': 'player', 'extra': player.getExtra()}
     playerrequest = requests.get("http://" + gameworld + "." + mainurl, params = playerparams, cookies = cookies)
 
-    playerhtml = BeautifulSoup(playerrequest.text)
+    playerhtml = BeautifulSoup(playerrequest.text, features='html.parser')
     tree = playerhtml.body
 
     for content in tree:
         if not content.string:
-            if content.name == 'div' and content['class'] == 'body':
+            if content.name == 'div' and content['class'][0] == 'body':
                 tree = content
                 break
 
     for content in tree:
         if not content.string:
-            if content.name == 'div' and content['class'] == 'content':
+            if content.name == 'div' and content['class'][0] == 'content':
                 tree = content
                 break
 
     for content in tree:
         if not content.string:
-            if content.name == 'form': #and content['class'] == 'content':
+            if content.name == 'form': #and content['class'][0] == 'content':
                 tree = content
                 break
 
     for content in tree:
         if not content.string:
-            if content.name == 'p' and content['class'] == 'doubles_partner':
+            if content.name == 'p' and content['class'][0] == 'doubles_partner':
                 tree = content
                 break
 
     for content in tree:
         if not content.string:
-            if content.name == 'table' and content['class'] == 'player_infotable':
+            if content.name == 'table' and content['class'][0] == 'player_infotable':
                 tree = content
                 break
 
@@ -317,25 +317,25 @@ def search(subpage, subsubpage, max_cost = ''):
         playersparams = {'page':'players', 'subpage': subpage, 'subsubpage':subsubpage, 'start':start, 'sort':sortparam}
         playersparams.update(searchparams)
         playersrequest = requests.get("http://" + gameworld + "." + mainurl, params = playersparams, cookies = loginrequest.cookies)
-        playershtml = BeautifulSoup(playersrequest.text, convertEntities=BeautifulSoup.HTML_ENTITIES, fromEncoding='windows-1252')
+        playershtml = BeautifulSoup(playersrequest.text, features='html.parser')
         tree = playershtml.body
 
         for content in tree:
             if not content.string:
-                if content.name == 'div' and content['class'] == 'body':
+                if content.name == 'div' and content['class'][0] == 'body':
                     tree = content
                     break
 
         for content in tree:
             if not content.string:
-                if content.name == 'div' and content['class'] == 'content':
+                if content.name == 'div' and content['class'][0] == 'content':
                     tree = content
                     break
 
         first = False
         for content in tree:
             if not content.string:
-                if content.name == 'table' and content['class'] == 'realtable':
+                if content.name == 'table' and content['class'][0] == 'realtable':
                     if subpage is 'all':
                         tree = content
                         break
@@ -365,12 +365,12 @@ def search(subpage, subsubpage, max_cost = ''):
         start += 1
 
 def simpleShow():
-    players = playersdict.values()
+    players = list(playersdict.values())
     list.sort(players, key = lambda player: player.getTotal())
     printPlayers(players, headers = headerList())
 
 def show():
-    players = playersdict.values()
+    players = list(playersdict.values())
 
     list.sort(players, key = lambda player: player.getMaxStrength(), reverse = True)
     order = 0
@@ -488,7 +488,7 @@ def printPlayers(players, headers = []):
             for j in range(len(playerList)):
                 cprint(u"{0:{1}}".format(playerList[j], columnswidth[j]), end='')
                 cprint("   ", end='')
-        print ""
+        print("")
 
     printSeparator(columnswidth)
     printSeparator(columnswidth)
@@ -496,14 +496,14 @@ def printPlayers(players, headers = []):
     for j in range(len(headers)):
         cprint("{0:{1}}".format(headers[j], columnswidth[j]), end='')
         cprint("   ", end='')
-    print ""
+    print("")
 
 def printSeparator(columnswidth):
     for j in range(len(columnswidth)):
         for k in range(columnswidth[j]):
             cprint("-", end='')
         cprint("   ", end='')
-    print ""
+    print("")
 
 def clear():
     global playersdict
@@ -523,18 +523,19 @@ subsubpages = {1: "14-", 2: "15_16", 3: "17_18", 4: "19_20", 5: "21_23", 6: "24_
 
 gameworld = "rr" + str(input("Game World: "))
 
-search('free', '14-')
-search('free', '15_16')
+#search('free', '14-')
+#search('free', '15_16')
 
-search('all', '14-')
-search('all', '15_16')
+#search('all', '14-')
+#search('all', '15_16')
 
 #search('all', '17_18')
+search('all', '19_20')
 
 simpleShow()
 
 while True:
-    raw_input()
+    input()
     search('free', '14-', max_cost = 0)
     search('free', '15_16', max_cost = 0)
 
